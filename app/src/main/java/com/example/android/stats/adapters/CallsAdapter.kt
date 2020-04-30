@@ -6,9 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.example.android.stats.CallLogInfo
-import com.example.android.stats.android.R
-import com.example.android.stats.android.inflate
-import com.example.android.stats.android.toPrettyString
+import com.example.android.stats.R
 import com.example.android.stats.inflate
 import com.example.android.stats.toPrettyString
 import kotlinx.android.synthetic.main.recyclerview_item_row.view.*
