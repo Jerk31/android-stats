@@ -4,6 +4,8 @@ import android.Manifest.permission.READ_CALL_LOG
 import android.content.pm.PackageManager.PERMISSION_GRANTED
 import android.os.Build
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
@@ -17,6 +19,7 @@ import kotlinx.android.synthetic.main.activity_main.*
 import java.time.LocalDateTime
 import java.util.*
 
+
 @RequiresApi(Build.VERSION_CODES.O)
 class MainActivity : AppCompatActivity() {
     private val callsData = mutableListOf<CallLogInfo>()
@@ -25,19 +28,33 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        setSupportActionBar(findViewById(R.id.toolbar))
+        setSupportActionBar(findViewById(R.id.topAppBar))
 
         if (getRuntimePermissions()) {
             setUpView()
         }
     }
 
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        super.onCreateOptionsMenu(menu)
+        menuInflater.inflate(R.menu.top_app_bar, menu)
+
+        if (getRuntimePermissions()) {
+            setUpMenu(menu!!)
+        }
+        return true
+    }
+
     private fun setUpView() {
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = CallsAdapter(callsData)
+    }
+
+    private fun setUpMenu(menu: Menu) {
+        val item: MenuItem = menu.findItem(R.id.spinner)
+        val spinner: Spinner = item.actionView as Spinner
 
         spinnerValues.addAll(resources.getTextArray(R.array.call_filters))
-        val spinner: Spinner = findViewById(R.id.spinner)
         val spinnerAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, spinnerValues)
         spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinner.adapter = spinnerAdapter
