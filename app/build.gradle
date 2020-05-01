@@ -2,6 +2,10 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 
+repositories {
+    maven { url 'https://jitpack.io' }
+}
+
 android {
     compileSdkVersion 29
     buildToolsVersion "29.0.3"
@@ -36,4 +40,5 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
     implementation 'androidx.recyclerview:recyclerview:1.1.0'
     implementation("com.google.android.material:material:1.2.0-alpha06")
+    implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
 }

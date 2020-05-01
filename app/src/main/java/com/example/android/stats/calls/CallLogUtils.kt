@@ -1,9 +1,10 @@
-package com.example.android.stats
+package com.example.android.stats.calls
 
 import android.annotation.SuppressLint
 import android.content.Context
 import android.provider.CallLog.Calls
-import java.io.Serializable
+import com.example.android.stats.atMidnight
+import com.example.android.stats.toDate
 import java.time.DayOfWeek
 import java.time.LocalDateTime
 import java.time.LocalDateTime.now
@@ -11,7 +12,16 @@ import java.time.temporal.ChronoUnit
 import java.time.temporal.TemporalAdjusters
 import java.time.temporal.WeekFields
 
-data class CallLogInfo(val name: String?, val number: String, val callType: Int, val date: Long, val duration: Long) : Serializable
+data class CallLogInfo(val name: String?, val number: String, val callType: Int, val date: Long, val duration: Long)
+data class IndividualCallStats(var name: String, var totalTime: Long = 0L, val calls: MutableList<CallLogInfo> = mutableListOf()) {
+    fun addCall(call: CallLogInfo): IndividualCallStats {
+        this.calls.add(call)
+        this.totalTime += call.duration
+        return this
+    }
+}
+
+data class CallStats(val totalTime: Long, val individualCalls: List<IndividualCallStats>)
 
 fun getTodayTimeRange(): Pair<LocalDateTime, LocalDateTime> = Pair(
     now().atMidnight(),
@@ -89,3 +99,14 @@ fun getCallLogs(context: Context, startDate: LocalDateTime? = null, endDate: Loc
     println(callLogs.joinToString(separator = "\n"))
     return callLogs
 }
+
+fun generateStats(callLogs: List<CallLogInfo>): CallStats {
+    val totalTime = callLogs.map { it.duration }.sum()
+    val individualStats = callLogs
+        .groupingBy { it.name ?: it.number }
+        .fold({ k, e -> IndividualCallStats(k).addCall(e) }) { _, acc, e -> acc.addCall(e) }
+        .values
+        .toList()
+    return CallStats(totalTime, individualStats)
+}
+

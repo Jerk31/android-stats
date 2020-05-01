@@ -1,16 +1,3 @@
 <resources>
     <string name="app_name">Android Stats</string>
-    <string name="page_title">Calls</string>
-
-    <string name="today">Today</string>
-    <string name="this_week">This week</string>
-    <string name="last_week">Last week</string>
-    <string name="custom">Custom</string>
-
-    <string-array name="call_filters">
-        <item>@string/today</item>
-        <item>@string/this_week</item>
-        <item>@string/last_week</item>
-        <item>@string/custom</item>
-    </string-array>
 </resources>

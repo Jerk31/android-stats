@@ -1,11 +1,10 @@
-package com.example.android.stats.adapters
+package com.example.android.stats.calls
 
 import android.provider.CallLog.Calls
 import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.example.android.stats.CallLogInfo
 import com.example.android.stats.R
 import com.example.android.stats.inflate
 import com.example.android.stats.toPrettyString
