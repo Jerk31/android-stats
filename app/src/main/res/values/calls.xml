@@ -2,6 +2,10 @@
 <resources>
     <string name="calls_page_title">Calls</string>
     <string name="total_call">Total call duration</string>
+    <string name="incoming_calls">Incoming calls</string>
+    <string name="outgoing_calls">Outgoing calls</string>
+    <string name="missed_calls">Missed calls</string>
+    <string name="detailed_stats_for">Detailed stats for: %s</string>
     <string name="callers">Callers</string>
 
     <string name="today">Today</string>

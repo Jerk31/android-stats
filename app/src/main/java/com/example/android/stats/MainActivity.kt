@@ -4,8 +4,10 @@ import android.Manifest.permission.READ_CALL_LOG
 import android.content.pm.PackageManager.PERMISSION_GRANTED
 import android.os.Build
 import android.os.Bundle
+import android.provider.CallLog
 import android.view.Menu
 import android.view.View
+import android.view.View.VISIBLE
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Spinner
@@ -15,14 +17,18 @@ import androidx.appcompat.app.AppCompatActivity
 import com.example.android.stats.calls.*
 import com.github.mikephil.charting.charts.HorizontalBarChart
 import com.github.mikephil.charting.components.XAxis
-import com.github.mikephil.charting.data.BarData
-import com.github.mikephil.charting.data.BarDataSet
-import com.github.mikephil.charting.data.BarEntry
+import com.github.mikephil.charting.data.*
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
 import com.github.mikephil.charting.formatter.ValueFormatter
+import com.github.mikephil.charting.highlight.Highlight
+import com.github.mikephil.charting.highlight.HorizontalBarHighlighter
+import com.github.mikephil.charting.interfaces.datasets.IDataSet
+import com.github.mikephil.charting.listener.OnChartValueSelectedListener
 import com.github.mikephil.charting.utils.ColorTemplate
 import com.google.android.material.datepicker.MaterialDatePicker
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.call_stats.*
+import kotlinx.android.synthetic.main.detailed_stats.*
 import java.time.Duration
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
@@ -65,17 +71,48 @@ class MainActivity : AppCompatActivity() {
         chart.setPinchZoom(false)
         chart.setScaleEnabled(false)
         chart.setDrawGridBackground(false)
+        chart.setHighlighter(object : HorizontalBarHighlighter(chart) {
+            override fun buildHighlights(set: IDataSet<*>, dataSetIndex: Int, xVal: Float, rounding: DataSet.Rounding): List<Highlight> {
+                var entries: List<Entry> = set.getEntriesForXValue(xVal)
+                if (entries.isEmpty()) {
+                    // Try to find closest x-value
+                    val closest: Entry = set.getEntryForXValue(xVal, Float.NaN, rounding)
+                    entries = listOf(closest)
+                }
+
+                return entries.map { e ->
+                    val pixels = mChart.getTransformer(set.axisDependency).getPixelForValues(e.y, e.x)
+                    Highlight(
+                        e.x, e.y,
+                        pixels.x.toFloat(), pixels.y.toFloat(),
+                        dataSetIndex, set.axisDependency
+                    )
+                }.toList()
+            }
+        })
+        chart.setOnChartValueSelectedListener(object : OnChartValueSelectedListener {
+            override fun onNothingSelected() {
+            }
+
+            override fun onValueSelected(e: Entry, h: Highlight) {
+                if (e.data == null) {
+                    return
+                }
+                displayDetailedStats(e.data as IndividualCallStats)
+            }
+        })
         chart.legend.isEnabled = false
 
         val xAxis = chart.xAxis
         xAxis.setDrawGridLines(false)
-        xAxis.setDrawAxisLine(false)
+        xAxis.setDrawAxisLine(true)
         xAxis.position = XAxis.XAxisPosition.TOP
-        xAxis.xOffset = -345f
+        xAxis.textColor = getColor(R.color.design_default_color_on_primary)
         xAxis.isEnabled = true
 
         val yAxis = chart.axisLeft
         yAxis.setDrawAxisLine(true)
+        yAxis.textColor = getColor(R.color.design_default_color_on_primary)
         yAxis.valueFormatter = object : ValueFormatter() {
             override fun getFormattedValue(value: Float): String {
                 return Duration.of(value.toLong(), ChronoUnit.SECONDS).toPrettyString()
@@ -100,7 +137,7 @@ class MainActivity : AppCompatActivity() {
             }
 
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                val selectedItem = parent?.getItemAtPosition(position)
+                val selectedItem: String = parent?.getItemAtPosition(position) as String
                 if (getText(R.string.custom) == selectedItem) {
                     selectCustomTimeRange()
                     return
@@ -110,21 +147,17 @@ class MainActivity : AppCompatActivity() {
                     getText(R.string.today) -> getTodayTimeRange()
                     getText(R.string.this_week) -> getThisWeekTimeRange()
                     getText(R.string.last_week) -> getLastWeekTimeRange()
-                    else -> null
+                    else -> getTimeRangeFromString(selectedItem)
                 }
-                if (timeRange != null) {
-                    updateCallsData(timeRange)
-                }
+                updateCallsData(timeRange)
             }
         }
     }
 
     private fun updateCallsData(timeRange: Pair<LocalDateTime, LocalDateTime>) {
-        val callLogs = getCallLogs(
-            applicationContext,
-            startDate = timeRange.first,
-            endDate = timeRange.second
-        )
+        calls_detailed_stats_card.visibility = View.INVISIBLE
+
+        val callLogs = getCallLogs(applicationContext, startDate = timeRange.first, endDate = timeRange.second)
         val callStats = generateStats(callLogs)
         var sortedIndividualCallStats = callStats.individualCalls.sortedByDescending(IndividualCallStats::totalTime)
         // Limit to 10 visible items
@@ -146,9 +179,9 @@ class MainActivity : AppCompatActivity() {
         chart.xAxis.labelCount = xValues.size
         chart.xAxis.valueFormatter = IndexAxisValueFormatter(xValues)
 
-        val entries = sortedIndividualCallStats.map { BarEntry(xValues.indexOf(it.name).toFloat(), it.totalTime.toFloat()) }
+        val entries = sortedIndividualCallStats.map { BarEntry(xValues.indexOf(it.name).toFloat(), it.totalTime.toFloat(), it) }
         val dataset = BarDataSet(entries, "Time per caller")
-        dataset.colors = ColorTemplate.COLORFUL_COLORS.toList()
+        dataset.colors = ColorTemplate.COLORFUL_COLORS.toList() + ColorTemplate.JOYFUL_COLORS.toList() + ColorTemplate.MATERIAL_COLORS.toList()
         dataset.valueTextSize = 10f
         dataset.setDrawValues(false)
 
@@ -156,6 +189,28 @@ class MainActivity : AppCompatActivity() {
         barData.barWidth = 0.9f
         chart.data = barData
         chart.invalidate()
+    }
+
+    private fun displayDetailedStats(data: IndividualCallStats) {
+        calls_detailed_stats_card.visibility = VISIBLE
+
+        detailed_stats_label.text = getString(R.string.detailed_stats_for).format(data.name)
+
+        val outgoingCalls = countTypeAndDuration(data.calls, CallLog.Calls.OUTGOING_TYPE)
+        outgoing_calls_number.text = outgoingCalls.first.toString()
+        outgoing_calls_duration.text = Duration.of(outgoingCalls.second, ChronoUnit.SECONDS).toPrettyString()
+
+        val incomingCalls = countTypeAndDuration(data.calls, CallLog.Calls.INCOMING_TYPE)
+        incoming_calls_number.text = incomingCalls.first.toString()
+        incoming_calls_duration.text = Duration.of(incomingCalls.second, ChronoUnit.SECONDS).toPrettyString()
+
+        val missedCalls = data.calls.filter { it.callType == CallLog.Calls.MISSED_TYPE }
+        missed_calls_number.text = missedCalls.size.toString()
+    }
+
+    private fun countTypeAndDuration(calls: List<CallLogInfo>, wantedType: Int): Pair<Int, Long> {
+        val byType = calls.filter { it.callType == wantedType }
+        return Pair(byType.size, byType.fold(0L) { sum, e -> sum + e.duration })
     }
 
     private fun refreshSpinner(timeRange: Pair<LocalDateTime, LocalDateTime>) {
@@ -176,9 +231,7 @@ class MainActivity : AppCompatActivity() {
 
         val picker = pickerBuilder.build()
         picker.addOnPositiveButtonClickListener {
-            val selectedDates = Pair(toLocalDateTime(it.first!!), toLocalDateTime(it.second!!))
-            refreshSpinner(selectedDates)
-            updateCallsData(selectedDates)
+            refreshSpinner(Pair(toLocalDateTime(it.first!!), toLocalDateTime(it.second!!)))
         }
 
         picker.show(supportFragmentManager, picker.toString())

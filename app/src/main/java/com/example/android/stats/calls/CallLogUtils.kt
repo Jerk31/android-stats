@@ -5,6 +5,7 @@ import android.content.Context
 import android.provider.CallLog.Calls
 import com.example.android.stats.atMidnight
 import com.example.android.stats.toDate
+import com.example.android.stats.toLocalDateTime
 import java.time.DayOfWeek
 import java.time.LocalDateTime
 import java.time.LocalDateTime.now
@@ -22,6 +23,14 @@ data class IndividualCallStats(var name: String, var totalTime: Long = 0L, val c
 }
 
 data class CallStats(val totalTime: Long, val individualCalls: List<IndividualCallStats>)
+
+fun getTimeRangeFromString(string: String): Pair<LocalDateTime, LocalDateTime> {
+    val match = "From (.+) to (.+)".toRegex().find(string)
+    if (match == null || match.groupValues.size < 2) {
+        return getTodayTimeRange()
+    }
+    return Pair(toLocalDateTime(match.groupValues[1]), toLocalDateTime(match.groupValues[2]))
+}
 
 fun getTodayTimeRange(): Pair<LocalDateTime, LocalDateTime> = Pair(
     now().atMidnight(),
@@ -94,9 +103,6 @@ fun getCallLogs(context: Context, startDate: LocalDateTime? = null, endDate: Loc
             )
         }
     }
-
-    println(">>> CALL LOGS (between start=%s and end=%s)".format(startDate, endDate))
-    println(callLogs.joinToString(separator = "\n"))
     return callLogs
 }
 
