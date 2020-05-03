@@ -5,23 +5,23 @@
     android:layout_height="wrap_content">
 
     <androidx.cardview.widget.CardView
-        android:id="@+id/total_calls_card"
+        android:id="@+id/total_card"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="5dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <include layout="@layout/total_calls" />
+        <include layout="@layout/stats_total" />
     </androidx.cardview.widget.CardView>
 
     <androidx.cardview.widget.CardView
-        android:id="@+id/call_stats_card"
+        android:id="@+id/stats_card"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="5dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/total_calls_card">
+        app:layout_constraintTop_toBottomOf="@id/total_card">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -29,14 +29,15 @@
             android:orientation="vertical">
 
             <TextView
+                android:id="@+id/chart_text"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:layout_marginStart="16dp"
                 android:gravity="center"
-                android:text="@string/callers" />
+                android:text="@string/calls_stats_title" />
 
             <com.github.mikephil.charting.charts.HorizontalBarChart
-                android:id="@+id/callers_chart"
+                android:id="@+id/chart"
                 android:layout_gravity="center"
                 android:layout_width="match_parent"
                 android:layout_height="300dp" />
@@ -45,14 +46,11 @@
     </androidx.cardview.widget.CardView>
 
     <androidx.cardview.widget.CardView
-        android:id="@+id/calls_detailed_stats_card"
+        android:id="@+id/detailed_stats_card"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="5dp"
         android:visibility="invisible"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/call_stats_card">
-
-        <include layout="@layout/detailed_stats" />
-    </androidx.cardview.widget.CardView>
+        app:layout_constraintTop_toBottomOf="@id/stats_card" />
 </androidx.constraintlayout.widget.ConstraintLayout>

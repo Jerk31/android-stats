@@ -2,22 +2,9 @@
 <resources>
     <string name="calls_page_title">Calls</string>
     <string name="total_call">Total call duration</string>
+    <string name="calls_stats_title">Callers</string>
     <string name="incoming_calls">Incoming calls</string>
     <string name="outgoing_calls">Outgoing calls</string>
     <string name="missed_calls">Missed calls</string>
-    <string name="detailed_stats_for">Detailed stats for: %s</string>
-    <string name="callers">Callers</string>
-
-    <string name="today">Today</string>
-    <string name="this_week">This week</string>
-    <string name="last_week">Last week</string>
-    <string name="custom">Custom</string>
-
-    <string-array name="call_filters">
-        <item>@string/today</item>
-        <item>@string/this_week</item>
-        <item>@string/last_week</item>
-        <item>@string/custom</item>
-    </string-array>
-
+    <string name="detailed_call_stats_for">Detailed call stats for: %s</string>
 </resources>

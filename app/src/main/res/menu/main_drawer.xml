@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_calls"
+            android:icon="@android:drawable/ic_menu_call"
+            android:checked="true"
+            android:title="@string/calls_page_title"/>
+<!--        <item-->
+<!--            android:id="@+id/nav_screen_time"-->
+<!--            android:icon="@android:drawable/ic_menu_call"-->
+<!--            android:title="Gallery"/>-->
+    </group>
+</menu>

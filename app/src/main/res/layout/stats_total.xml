@@ -1,25 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tool="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
     <ImageView
+        android:id="@+id/total_image"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="8dp"
-        android:contentDescription="@android:string/emptyPhoneNumber"
-        app:srcCompat="@android:drawable/ic_menu_call" />
+        tool:src="@android:drawable/ic_menu_call" />
 
     <TextView
+        android:id="@+id/total_text"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:gravity="center_vertical"
-        android:text="@string/total_call" />
+        tool:text="@string/total_call" />
 
     <TextView
-        android:id="@+id/total_calls"
+        android:id="@+id/total_amount"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_marginStart="16dp"

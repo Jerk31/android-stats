@@ -9,6 +9,7 @@ import com.example.android.stats.toLocalDateTime
 import java.time.DayOfWeek
 import java.time.LocalDateTime
 import java.time.LocalDateTime.now
+import java.time.format.DateTimeParseException
 import java.time.temporal.ChronoUnit
 import java.time.temporal.TemporalAdjusters
 import java.time.temporal.WeekFields
@@ -22,14 +23,16 @@ data class IndividualCallStats(var name: String, var totalTime: Long = 0L, val c
     }
 }
 
-data class CallStats(val totalTime: Long, val individualCalls: List<IndividualCallStats>)
-
 fun getTimeRangeFromString(string: String): Pair<LocalDateTime, LocalDateTime> {
     val match = "From (.+) to (.+)".toRegex().find(string)
     if (match == null || match.groupValues.size < 2) {
         return getTodayTimeRange()
     }
-    return Pair(toLocalDateTime(match.groupValues[1]), toLocalDateTime(match.groupValues[2]))
+    return try {
+        Pair(toLocalDateTime(match.groupValues[1]), toLocalDateTime(match.groupValues[2]))
+    } catch (ex: DateTimeParseException) {
+        getTodayTimeRange()
+    }
 }
 
 fun getTodayTimeRange(): Pair<LocalDateTime, LocalDateTime> = Pair(
@@ -106,13 +109,11 @@ fun getCallLogs(context: Context, startDate: LocalDateTime? = null, endDate: Loc
     return callLogs
 }
 
-fun generateStats(callLogs: List<CallLogInfo>): CallStats {
-    val totalTime = callLogs.map { it.duration }.sum()
-    val individualStats = callLogs
+fun generateStats(callLogs: List<CallLogInfo>): List<IndividualCallStats> {
+    return callLogs
         .groupingBy { it.name ?: it.number }
         .fold({ k, e -> IndividualCallStats(k).addCall(e) }) { _, acc, e -> acc.addCall(e) }
         .values
         .toList()
-    return CallStats(totalTime, individualStats)
 }
 
