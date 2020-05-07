@@ -1,5 +1,7 @@
 package com.example.android.stats
 
+import android.content.Context
+import android.text.format.Formatter.formatShortFileSize
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
@@ -43,4 +45,8 @@ fun Long.toPrettyDuration(withSeconds: Boolean = true): String {
         }
     }
     return timeParts.joinToString(separator = " ")
+}
+
+fun Long.toPrettyByteSize(context: Context): String {
+    return formatShortFileSize(context, this)
 }

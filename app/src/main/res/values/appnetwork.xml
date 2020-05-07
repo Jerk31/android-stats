@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="appnetwork_page_title">App Network</string>
+    <string name="appnetwork_total">Total network usage (sent + received)</string>
+    <string name="appnetwork_stats_title">Data received per application</string>
+    <string name="data_received">Data received</string>
+    <string name="data_sent">Data sent</string>
+</resources>

@@ -14,6 +14,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.bundleOf
 import androidx.core.view.GravityCompat
 import androidx.fragment.app.FragmentTransaction
+import com.example.android.stats.appnetwork.AppNetworkStats
 import com.example.android.stats.appusage.AppUsageStats
 import com.example.android.stats.calls.CallsStats
 import com.google.android.material.datepicker.MaterialDatePicker
@@ -127,6 +128,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         val statsProvider = when (item.itemId) {
             R.id.nav_calls -> CallsStats(this)
             R.id.nav_app_usage -> AppUsageStats(this)
+            R.id.nav_app_network -> AppNetworkStats(this)
             else -> throw IllegalStateException("Case not handled!")
         }
 

@@ -1,43 +1,27 @@
 package com.example.android.stats.appusage
 
 import android.app.AppOpsManager
-import android.app.AppOpsManager.MODE_ALLOWED
-import android.app.AppOpsManager.OPSTR_GET_USAGE_STATS
 import android.content.Context
-import android.content.Intent
-import android.content.pm.PackageManager
-import android.os.Process
-import android.provider.Settings
 import android.view.View
 import com.example.android.stats.*
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import java.time.LocalDateTime
 import java.util.concurrent.TimeUnit.MILLISECONDS
 
 class AppUsageStats(private val context: Context) : StatsProvider<AppUsage> {
-    companion object {
-        const val PERMISSIONS_CODE = 123
-    }
-
     override fun getPageTitle(): String {
         return context.getString(R.string.appusage_page_title)
     }
 
     override fun checkRuntimePermissions(): Boolean {
-        val appOps = context.getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager
-        val mode = appOps.checkOpNoThrow(OPSTR_GET_USAGE_STATS, Process.myUid(), context.packageName)
-        return mode == MODE_ALLOWED
+        return checkModePermission(context, AppOpsManager.OPSTR_GET_USAGE_STATS)
     }
 
     override fun requestPermissions() {
-        MaterialAlertDialogBuilder(context)
-            .setMessage("This view requires usage stats permission. Grant it in next view and click <back> to come back!")
-            .setPositiveButton("OK") { _, _ -> context.startActivity(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)) }
-            .show()
+        requestUsageAccess(context)
     }
 
     override fun onRuntimePermissionsUpdated(requestCode: Int, permissions: Array<out String>, grantResults: IntArray): Boolean {
-        return requestCode == PERMISSIONS_CODE && grantResults.isNotEmpty() && grantResults.all { it == PackageManager.PERMISSION_GRANTED }
+        return true
     }
 
     override fun getDataForRange(range: Pair<LocalDateTime, LocalDateTime>): List<AppUsage> {

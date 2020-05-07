@@ -62,6 +62,7 @@ class StatsFragment<T>(private var statsProvider: StatsProvider<T>) : Fragment()
         chart.setDrawBarShadow(false)
         chart.setDrawValueAboveBar(false)
         chart.setPinchZoom(false)
+        chart.isDoubleTapToZoomEnabled = false
         chart.isScaleYEnabled = true
         chart.isScaleXEnabled = false
         chart.setDrawGridBackground(false)
