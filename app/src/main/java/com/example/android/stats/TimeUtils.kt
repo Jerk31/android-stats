@@ -40,7 +40,13 @@ fun getTimeRangeFromString(string: String): Pair<LocalDateTime, LocalDateTime> {
         return getTodayTimeRange()
     }
     return try {
-        Pair(toLocalDateTime(match.groupValues[1]), toLocalDateTime(match.groupValues[2]))
+        var startTime = toLocalDateTime(match.groupValues[1])
+        var endTime = toLocalDateTime(match.groupValues[2])
+        if (startTime == endTime) {
+            startTime = startTime.atMidnight()
+            endTime = endTime.plusDays(1).atMidnight().minusMinutes(1)
+        }
+        Pair(startTime, endTime)
     } catch (ex: DateTimeParseException) {
         getTodayTimeRange()
     }

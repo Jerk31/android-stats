@@ -101,7 +101,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         val picker = pickerBuilder.build()
         picker.addOnPositiveButtonClickListener {
-            refreshSpinner(Pair(toLocalDateTime(it.first!!), toLocalDateTime(it.second!!)))
+            val startTime = toLocalDateTime(it.first!!)
+            val endTime = toLocalDateTime(it.second!!)
+            refreshSpinner(Pair(startTime, endTime))
         }
 
         picker.show(supportFragmentManager, picker.toString())

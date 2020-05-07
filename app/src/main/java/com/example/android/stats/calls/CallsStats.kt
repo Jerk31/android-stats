@@ -41,7 +41,7 @@ class CallsStats(private val context: Context) : StatsProvider<IndividualCallSta
         }
 
         val callLogs = getCallLogs(context, startDate = range.first, endDate = range.second)
-        var sortedStats = generateStats(callLogs).sortedByDescending(IndividualCallStats::totalTime)
+        var sortedStats = generateStats(callLogs).sortedBy(IndividualCallStats::totalTime)
         // Limit to 10 visible items
         if (sortedStats.size > 10) {
             val toMerge = sortedStats.subList(10, sortedStats.size)
@@ -72,7 +72,7 @@ class CallsStats(private val context: Context) : StatsProvider<IndividualCallSta
     }
 
     override fun getXValues(data: List<IndividualCallStats>): List<String> {
-        return data.map(IndividualCallStats::name).reversed()
+        return data.map(IndividualCallStats::name)
     }
 
     override fun dataToX(): (data: IndividualCallStats) -> String = IndividualCallStats::name

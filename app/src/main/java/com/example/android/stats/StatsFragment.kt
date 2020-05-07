@@ -62,8 +62,10 @@ class StatsFragment<T>(private var statsProvider: StatsProvider<T>) : Fragment()
         chart.setDrawBarShadow(false)
         chart.setDrawValueAboveBar(false)
         chart.setPinchZoom(false)
-        chart.setScaleEnabled(false)
+        chart.isScaleYEnabled = true
+        chart.isScaleXEnabled = false
         chart.setDrawGridBackground(false)
+        chart.legend.isEnabled = false
         chart.setHighlighter(object : HorizontalBarHighlighter(chart) {
             override fun buildHighlights(set: IDataSet<*>, dataSetIndex: Int, xVal: Float, rounding: DataSet.Rounding): List<Highlight> {
                 var entries: List<Entry> = set.getEntriesForXValue(xVal)
@@ -95,7 +97,6 @@ class StatsFragment<T>(private var statsProvider: StatsProvider<T>) : Fragment()
                 displayDetailedStats(e.data as T)
             }
         })
-        chart.legend.isEnabled = false
 
         val xAxis = chart.xAxis
         xAxis.setDrawGridLines(false)
@@ -103,9 +104,11 @@ class StatsFragment<T>(private var statsProvider: StatsProvider<T>) : Fragment()
         xAxis.position = XAxis.XAxisPosition.TOP
         xAxis.textColor = activity!!.getColor(R.color.design_default_color_on_primary)
         xAxis.isEnabled = true
+        xAxis.granularity = 1f
 
         val yAxis = chart.axisLeft
         yAxis.setDrawAxisLine(true)
+        yAxis.setLabelCount(5, true)
         yAxis.textColor = activity!!.getColor(R.color.design_default_color_on_primary)
         yAxis.valueFormatter = object : ValueFormatter() {
             override fun getFormattedValue(value: Float): String {
@@ -117,9 +120,14 @@ class StatsFragment<T>(private var statsProvider: StatsProvider<T>) : Fragment()
         yRight.isEnabled = false
     }
 
+    private fun resetChart(chart: HorizontalBarChart) {
+        chart.fitScreen()
+        chart.clear()
+    }
+
     fun onRangeSelected(timeRange: Pair<LocalDateTime, LocalDateTime>) {
         detailed_stats_card.visibility = View.INVISIBLE
-        chart.highlightValue(null)
+        resetChart(chart)
 
         this.timeRange = timeRange
         val data = statsProvider.getDataForRange(timeRange)
@@ -141,12 +149,13 @@ class StatsFragment<T>(private var statsProvider: StatsProvider<T>) : Fragment()
         }
 
         val dataset = BarDataSet(entries, "Time per caller")
-        dataset.colors = ColorTemplate.COLORFUL_COLORS.toList() + ColorTemplate.JOYFUL_COLORS.toList() + ColorTemplate.MATERIAL_COLORS.toList()
+        dataset.colors = ColorTemplate.MATERIAL_COLORS.toList() + ColorTemplate.JOYFUL_COLORS.toList() + ColorTemplate.COLORFUL_COLORS.toList()
         dataset.valueTextSize = 10f
         dataset.setDrawValues(false)
 
         val barData = BarData(dataset)
         barData.barWidth = 0.9f
+
         chart.data = barData
         chart.invalidate()
     }

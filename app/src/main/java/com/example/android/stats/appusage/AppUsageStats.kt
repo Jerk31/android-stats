@@ -45,7 +45,7 @@ class AppUsageStats(private val context: Context) : StatsProvider<AppUsage> {
             return emptyList()
         }
         val appUsage = getAppUsage(context, range.first, range.second).filter { it.value.totalTimeInForeground > 0L }
-        var sortedStats = generateStats(context, appUsage).sortedByDescending { it.stats.totalTimeInForeground }
+        var sortedStats = generateStats(context, appUsage).sortedBy { it.stats.totalTimeInForeground }
         if (appUsage.keys.size > 10) {
             sortedStats = sortedStats.filter { MILLISECONDS.toMinutes(it.stats.totalTimeInForeground) > 5 }
         }
@@ -69,7 +69,7 @@ class AppUsageStats(private val context: Context) : StatsProvider<AppUsage> {
     }
 
     override fun getXValues(data: List<AppUsage>): List<String> {
-        return data.map(AppUsage::appName).reversed()
+        return data.map(AppUsage::appName)
     }
 
     override fun dataToX(): (data: AppUsage) -> String = AppUsage::appName
