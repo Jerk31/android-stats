@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="calls_page_title">Calls</string>
-    <string name="total_call">Total call duration</string>
+    <string name="calls_total">Total call duration</string>
     <string name="calls_stats_title">Callers</string>
     <string name="incoming_calls">Incoming calls</string>
     <string name="outgoing_calls">Outgoing calls</string>
     <string name="missed_calls">Missed calls</string>
-    <string name="detailed_call_stats_for">Detailed call stats for: %s</string>
 </resources>

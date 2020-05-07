@@ -14,7 +14,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.bundleOf
 import androidx.core.view.GravityCompat
 import androidx.fragment.app.FragmentTransaction
-import com.example.android.stats.calls.*
+import com.example.android.stats.appusage.AppUsageStats
+import com.example.android.stats.calls.CallsStats
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.navigation.NavigationView
 import kotlinx.android.synthetic.main.activity_main.*
@@ -121,9 +122,14 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             return false
         }
 
-        when (item.itemId) {
-            R.id.nav_calls -> showFragment(StatsFragment(CallsStats(this)))
+        val statsProvider = when (item.itemId) {
+            R.id.nav_calls -> CallsStats(this)
+            R.id.nav_app_usage -> AppUsageStats(this)
+            else -> throw IllegalStateException("Case not handled!")
         }
+
+        showFragment(StatsFragment(statsProvider))
+        topAppBar.title = statsProvider.getPageTitle()
         selectedNavItem = item.itemId
         drawer_layout.closeDrawer(GravityCompat.START)
         return true

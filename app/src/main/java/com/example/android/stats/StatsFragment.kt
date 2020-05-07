@@ -23,29 +23,28 @@ import kotlinx.android.synthetic.main.stats.*
 import java.time.LocalDateTime
 
 class StatsFragment<T>(private var statsProvider: StatsProvider<T>) : Fragment() {
+    private var timeRange: Pair<LocalDateTime, LocalDateTime>? = null
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = layoutInflater.inflate(R.layout.stats, container, false)
-        if (statsProvider.checkRuntimePermissions()) {
-            setUpView(view)
-        } else {
+        setUpView(view)
+
+        @Suppress("UNCHECKED_CAST")
+        timeRange = arguments?.getSerializable(SELECTED_RANGE) as Pair<LocalDateTime, LocalDateTime>?
+
+        if (!statsProvider.checkRuntimePermissions()) {
             statsProvider.requestPermissions()
         }
         return view
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        if (statsProvider.checkRuntimePermissions()) {
-            onFragmentArguments()
-            LayoutInflater.from(detailed_stats_card.context).inflate(statsProvider.getDetailedStatsLayout(), detailed_stats_card)
-        }
+        LayoutInflater.from(detailed_stats_card.context).inflate(statsProvider.getDetailedStatsLayout(), detailed_stats_card)
     }
 
-    @Suppress("UNCHECKED_CAST")
-    private fun onFragmentArguments() {
-        val selectedTimeRange: Pair<LocalDateTime, LocalDateTime>? = arguments?.getSerializable(SELECTED_RANGE) as Pair<LocalDateTime, LocalDateTime>?
-        if (selectedTimeRange != null) {
-            onRangeSelected(selectedTimeRange)
-        }
+    override fun onResume() {
+        super.onResume()
+        timeRange?.let { onRangeSelected(it) }
     }
 
     private fun setUpView(v: View) {
@@ -122,6 +121,7 @@ class StatsFragment<T>(private var statsProvider: StatsProvider<T>) : Fragment()
         detailed_stats_card.visibility = View.INVISIBLE
         chart.highlightValue(null)
 
+        this.timeRange = timeRange
         val data = statsProvider.getDataForRange(timeRange)
 
         val totalCallsView: TextView = view!!.findViewById(R.id.total_amount)
@@ -159,10 +159,9 @@ class StatsFragment<T>(private var statsProvider: StatsProvider<T>) : Fragment()
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (statsProvider.onRuntimePermissionsUpdated(requestCode, permissions, grantResults)) {
-            setUpView(view!!)
-            onFragmentArguments()
+            timeRange?.let { onRangeSelected(it) }
         } else {
-            Log.e("StatsFragment", "NotEnoughPermissions to display fragment")
+            Log.e("StatsFragment", "NotEnoughPermissions to display data")
         }
     }
 }

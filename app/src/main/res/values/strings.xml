@@ -3,6 +3,8 @@
     <string name="drawer_open">Drawer Open</string>
     <string name="drawer_close">Drawer Close</string>
 
+    <string name="detailed_stats_for">Detailed stats for: %s</string>
+
     <string name="today">Today</string>
     <string name="this_week">This week</string>
     <string name="last_week">Last week</string>

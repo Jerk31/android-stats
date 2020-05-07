@@ -3,16 +3,8 @@ package com.example.android.stats.calls
 import android.annotation.SuppressLint
 import android.content.Context
 import android.provider.CallLog.Calls
-import com.example.android.stats.atMidnight
 import com.example.android.stats.toDate
-import com.example.android.stats.toLocalDateTime
-import java.time.DayOfWeek
 import java.time.LocalDateTime
-import java.time.LocalDateTime.now
-import java.time.format.DateTimeParseException
-import java.time.temporal.ChronoUnit
-import java.time.temporal.TemporalAdjusters
-import java.time.temporal.WeekFields
 
 data class CallLogInfo(val name: String?, val number: String, val callType: Int, val date: Long, val duration: Long)
 data class IndividualCallStats(var name: String, var totalTime: Long = 0L, val calls: MutableList<CallLogInfo> = mutableListOf()) {
@@ -21,46 +13,6 @@ data class IndividualCallStats(var name: String, var totalTime: Long = 0L, val c
         this.totalTime += call.duration
         return this
     }
-}
-
-fun getTimeRangeFromString(string: String): Pair<LocalDateTime, LocalDateTime> {
-    val match = "From (.+) to (.+)".toRegex().find(string)
-    if (match == null || match.groupValues.size < 2) {
-        return getTodayTimeRange()
-    }
-    return try {
-        Pair(toLocalDateTime(match.groupValues[1]), toLocalDateTime(match.groupValues[2]))
-    } catch (ex: DateTimeParseException) {
-        getTodayTimeRange()
-    }
-}
-
-fun getTodayTimeRange(): Pair<LocalDateTime, LocalDateTime> = Pair(
-    now().atMidnight(),
-    now()
-)
-
-fun getFirstDayOfWeek(fromDate: LocalDateTime = now()): LocalDateTime = fromDate
-    .with(TemporalAdjusters.previousOrSame(WeekFields.ISO.firstDayOfWeek))
-    .atMidnight()
-
-fun getLastDayOfWeek(fromDate: LocalDateTime = now()): LocalDateTime = fromDate
-    .with(TemporalAdjusters.nextOrSame(DayOfWeek.of(((WeekFields.ISO.firstDayOfWeek.value + 5) % DayOfWeek.values().size) + 1)))
-    .atMidnight()
-    .minusMinutes(1)
-
-fun getThisWeekTimeRange(): Pair<LocalDateTime, LocalDateTime> = now().let {
-    Pair(
-        getFirstDayOfWeek(it),
-        getLastDayOfWeek(it)
-    )
-}
-
-fun getLastWeekTimeRange(): Pair<LocalDateTime, LocalDateTime> = now().minus(1, ChronoUnit.WEEKS).let {
-    Pair(
-        getFirstDayOfWeek(it),
-        getLastDayOfWeek(it)
-    )
 }
 
 @SuppressLint("MissingPermission")

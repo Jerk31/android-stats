@@ -6,15 +6,13 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.provider.CallLog
 import android.view.View
-import android.widget.TextView
 import androidx.core.app.ActivityCompat.requestPermissions
 import androidx.core.content.PermissionChecker
 import com.example.android.stats.R
 import com.example.android.stats.StatsProvider
-import com.example.android.stats.toPrettyString
-import java.time.Duration
+import com.example.android.stats.findTextView
+import com.example.android.stats.toPrettyDuration
 import java.time.LocalDateTime
-import java.time.temporal.ChronoUnit
 
 class CallsStats(private val context: Context) : StatsProvider<IndividualCallStats> {
     companion object {
@@ -37,19 +35,11 @@ class CallsStats(private val context: Context) : StatsProvider<IndividualCallSta
         return requestCode == PERMISSIONS_CODE && grantResults.isNotEmpty() && grantResults.all { it == PackageManager.PERMISSION_GRANTED }
     }
 
-    override fun getTotalText(): String {
-        return context.getString(R.string.total_call)
-    }
-
-    override fun getTotalIcon(): Int {
-        return android.R.drawable.ic_menu_call
-    }
-
-    override fun getStatsText(): String {
-        return context.getString(R.string.calls_stats_title)
-    }
-
     override fun getDataForRange(range: Pair<LocalDateTime, LocalDateTime>): List<IndividualCallStats> {
+        if (!checkRuntimePermissions()) {
+            return emptyList()
+        }
+
         val callLogs = getCallLogs(context, startDate = range.first, endDate = range.second)
         var sortedStats = generateStats(callLogs).sortedByDescending(IndividualCallStats::totalTime)
         // Limit to 10 visible items
@@ -65,6 +55,18 @@ class CallsStats(private val context: Context) : StatsProvider<IndividualCallSta
         return sortedStats
     }
 
+    override fun getTotalText(): String {
+        return context.getString(R.string.calls_total)
+    }
+
+    override fun getTotalIcon(): Int {
+        return android.R.drawable.ic_menu_call
+    }
+
+    override fun getStatsText(): String {
+        return context.getString(R.string.calls_stats_title)
+    }
+
     override fun computeTotal(data: List<IndividualCallStats>): String {
         return data.map { it.totalTime }.sum().toPrettyDuration()
     }
@@ -77,7 +79,7 @@ class CallsStats(private val context: Context) : StatsProvider<IndividualCallSta
     override fun dataToY(): (data: IndividualCallStats) -> Float = { it.totalTime.toFloat() }
 
     override fun formatY(x: Float): String {
-        return x.toLong().toPrettyDuration()
+        return x.toLong().toPrettyDuration(false)
     }
 
     override fun getDetailedStatsLayout(): Int {
@@ -85,7 +87,7 @@ class CallsStats(private val context: Context) : StatsProvider<IndividualCallSta
     }
 
     override fun showDetailedStats(v: View, selected: IndividualCallStats) {
-        v.findTextView(R.id.detailed_stats_label).text = context.getString(R.string.detailed_call_stats_for).format(selected.name)
+        v.findTextView(R.id.detailed_stats_label).text = context.getString(R.string.detailed_stats_for).format(selected.name)
 
         val outgoingCalls = countTypeAndDuration(selected.calls, CallLog.Calls.OUTGOING_TYPE)
         v.findTextView(R.id.outgoing_calls_number).text = outgoingCalls.first.toString()
@@ -102,13 +104,5 @@ class CallsStats(private val context: Context) : StatsProvider<IndividualCallSta
     private fun countTypeAndDuration(calls: List<CallLogInfo>, wantedType: Int): Pair<Int, Long> {
         val byType = calls.filter { it.callType == wantedType }
         return Pair(byType.size, byType.fold(0L) { sum, e -> sum + e.duration })
-    }
-
-    private fun View.findTextView(id: Int): TextView {
-        return findViewById(id)
-    }
-
-    private fun Long.toPrettyDuration(): String {
-        return Duration.of(this, ChronoUnit.SECONDS).toPrettyString()
     }
 }

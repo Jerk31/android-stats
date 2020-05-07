@@ -5,10 +5,10 @@
             android:id="@+id/nav_calls"
             android:icon="@android:drawable/ic_menu_call"
             android:checked="true"
-            android:title="@string/calls_page_title"/>
-<!--        <item-->
-<!--            android:id="@+id/nav_screen_time"-->
-<!--            android:icon="@android:drawable/ic_menu_call"-->
-<!--            android:title="Gallery"/>-->
+            android:title="@string/calls_page_title" />
+        <item
+            android:id="@+id/nav_app_usage"
+            android:icon="@android:drawable/sym_def_app_icon"
+            android:title="App Usage" />
     </group>
 </menu>

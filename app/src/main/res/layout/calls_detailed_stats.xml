@@ -11,7 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="8dp"
-        android:text="@string/detailed_call_stats_for" />
+        android:text="@string/detailed_stats_for" />
 
     <LinearLayout
         android:layout_width="match_parent"
