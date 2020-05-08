@@ -7,7 +7,7 @@ import com.example.android.stats.toDate
 import java.time.LocalDateTime
 
 data class CallLogInfo(val name: String?, val number: String, val callType: Int, val date: Long, val duration: Long)
-data class IndividualCallStats(var name: String, var totalTime: Long = 0L, val calls: MutableList<CallLogInfo> = mutableListOf()) {
+data class IndividualCallStats(val name: String, var totalTime: Long = 0L, val calls: MutableList<CallLogInfo> = mutableListOf()) {
     fun addCall(call: CallLogInfo): IndividualCallStats {
         this.calls.add(call)
         this.totalTime += call.duration

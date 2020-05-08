@@ -47,13 +47,14 @@ class CallsStats(private val context: Context) : StatsProvider<IndividualCallSta
             var sortedStats = generateStats(callLogs).sortedBy(IndividualCallStats::totalTime)
             // Limit to 10 visible items
             if (sortedStats.size > 10) {
-                val toMerge = sortedStats.subList(10, sortedStats.size)
+                val keep10Index = sortedStats.size - 10
+                val toMerge = sortedStats.subList(0, keep10Index)
                 val reduced = toMerge.reduce { left, right ->
-                    right.calls.forEach { left.addCall(it) }
-                    left.name = "Other"
-                    left
+                    val mergedStats = IndividualCallStats("Other")
+                    (right.calls + left.calls).forEach { mergedStats.addCall(it) }
+                    mergedStats
                 }
-                sortedStats = sortedStats.subList(0, 9) + reduced
+                sortedStats = listOf(reduced) + sortedStats.subList(keep10Index, sortedStats.size)
             }
             return@withContext sortedStats
         }

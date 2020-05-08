@@ -13,7 +13,15 @@ import com.example.android.stats.toDate
 import java.time.LocalDateTime
 import java.time.LocalDateTime.now
 
-data class NetworkStats(val rxBytes: Long, val txBytes: Long)
+data class NetworkStats(val rxBytes: Long, val txBytes: Long) {
+    operator fun plus(other: NetworkStats?): NetworkStats {
+        if (other == null) {
+            return this
+        }
+        return NetworkStats(rxBytes + other.rxBytes, txBytes + other.txBytes)
+    }
+}
+
 data class AppNetwork(val appName: String, val appIcon: Drawable?, val mobileStats: NetworkStats?, val wifiStats: NetworkStats?)
 
 @SuppressLint("MissingPermission", "HardwareIds")
@@ -30,7 +38,8 @@ fun getNetworkStats(context: Context, startDate: LocalDateTime = now().atMidnigh
     while (mobileSummary.hasNextBucket()) {
         val bucket = android.app.usage.NetworkStats.Bucket()
         mobileSummary.getNextBucket(bucket)
-        uidToMobileStats[bucket.uid] = NetworkStats(bucket.rxBytes, bucket.txBytes)
+        val currentStats = uidToMobileStats.getOrPut(bucket.uid) { NetworkStats(0, 0) }
+        uidToMobileStats[bucket.uid] = currentStats + NetworkStats(bucket.rxBytes, bucket.txBytes)
     }
 
     // Wifi data
@@ -39,7 +48,8 @@ fun getNetworkStats(context: Context, startDate: LocalDateTime = now().atMidnigh
     while (wifiSummary.hasNextBucket()) {
         val bucket = android.app.usage.NetworkStats.Bucket()
         wifiSummary.getNextBucket(bucket)
-        uidToWifiStats[bucket.uid] = NetworkStats(bucket.rxBytes, bucket.txBytes)
+        val currentStats = uidToWifiStats.getOrPut(bucket.uid) { NetworkStats(0, 0) }
+        uidToWifiStats[bucket.uid] = currentStats + NetworkStats(bucket.rxBytes, bucket.txBytes)
     }
 
     val packageManager = context.packageManager

@@ -55,10 +55,17 @@ class AppNetworkStats(private val context: Context) : StatsProvider<AppNetwork> 
 
         return withContext(Dispatchers.IO) {
             var sortedStats = getNetworkStats(context, range.first, range.second)
-                .filter { getReceivedBytes(it) > 0L }
+                .filter { getReceivedBytes(it) > 1024 * 1024 } // 1Mo
                 .sortedBy { getReceivedBytes(it) }
             if (sortedStats.size > 10) {
-                sortedStats = sortedStats.filter { getReceivedBytes(it) > 1024 * 1024 } // > 1Mo
+                val keep10Index = sortedStats.size - 10
+                val toMerge = sortedStats.subList(0, keep10Index)
+                val reduced = toMerge.reduce { left, right ->
+                    val mobileStats = left.mobileStats?.plus(right.mobileStats) ?: right.mobileStats
+                    val wifiStats = left.wifiStats?.plus(right.wifiStats) ?: right.wifiStats
+                    AppNetwork("Other", null, mobileStats, wifiStats)
+                }
+                sortedStats = listOf(reduced) + sortedStats.subList(keep10Index, sortedStats.size)
             }
             return@withContext sortedStats
         }
