@@ -7,6 +7,8 @@ import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
 import android.net.ConnectivityManager
+import android.os.Build
+import android.provider.Settings
 import android.telephony.TelephonyManager
 import com.example.android.stats.atMidnight
 import com.example.android.stats.toDate
@@ -24,17 +26,15 @@ data class NetworkStats(val rxBytes: Long, val txBytes: Long) {
 
 data class AppNetwork(val appName: String, val appIcon: Drawable?, val mobileStats: NetworkStats?, val wifiStats: NetworkStats?)
 
-@SuppressLint("MissingPermission", "HardwareIds")
 fun getNetworkStats(context: Context, startDate: LocalDateTime = now().atMidnight(), endDate: LocalDateTime = now()): List<AppNetwork> {
     val nsm = context.getSystemService(NetworkStatsManager::class.java) ?: throw IllegalStateException("Could not find NetworkStatsManager")
-    val tm = context.getSystemService(TelephonyManager::class.java) ?: throw IllegalStateException("Could not find TelephonyManager")
 
     val startTime = startDate.toDate().time
     val endTime = endDate.toDate().time
 
     // Mobile data
     val uidToMobileStats = hashMapOf<Int, NetworkStats>()
-    val mobileSummary = nsm.querySummary(ConnectivityManager.TYPE_MOBILE, tm.subscriberId, startTime, endTime)
+    val mobileSummary = nsm.querySummary(ConnectivityManager.TYPE_MOBILE, getDeviceId(context), startTime, endTime)
     while (mobileSummary.hasNextBucket()) {
         val bucket = android.app.usage.NetworkStats.Bucket()
         mobileSummary.getNextBucket(bucket)
@@ -72,4 +72,13 @@ fun getNetworkStats(context: Context, startDate: LocalDateTime = now().atMidnigh
             )
         }
         .toList()
+}
+
+@SuppressLint("HardwareIds", "MissingPermission")
+private fun getDeviceId(context: Context): String {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        return Settings.Secure.getString(context.contentResolver, Settings.Secure.ANDROID_ID)
+    }
+    val tm = context.getSystemService(TelephonyManager::class.java) ?: throw IllegalStateException("Could not find TelephonyManager")
+    return tm.subscriberId
 }
