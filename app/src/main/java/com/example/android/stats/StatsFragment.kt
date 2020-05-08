@@ -21,6 +21,7 @@ import com.github.mikephil.charting.listener.OnChartValueSelectedListener
 import com.github.mikephil.charting.utils.ColorTemplate
 import kotlinx.android.synthetic.main.progress_overlay.*
 import kotlinx.android.synthetic.main.stats.*
+import kotlinx.android.synthetic.main.stats_total.*
 import kotlinx.coroutines.*
 import java.time.LocalDateTime
 
@@ -88,8 +89,8 @@ class StatsFragment<T>(private var statsProvider: StatsProvider<T>) : Fragment()
                 var entries: List<Entry> = set.getEntriesForXValue(xVal)
                 if (entries.isEmpty()) {
                     // Try to find closest x-value
-                    val closest: Entry = set.getEntryForXValue(xVal, Float.NaN, rounding)
-                    entries = listOf(closest)
+                    val closest: Entry? = set.getEntryForXValue(xVal, Float.NaN, rounding)
+                    entries = closest?.let { listOf(it) } ?: emptyList()
                 }
 
                 return entries.map { e ->
@@ -152,11 +153,14 @@ class StatsFragment<T>(private var statsProvider: StatsProvider<T>) : Fragment()
 
     private fun onDataFetched(data: List<T>) {
         progress_overlay.animate(View.GONE, 0f, 200)
+        total_amount.text = statsProvider.computeTotal(data)
 
-        val totalCallsView: TextView = view!!.findViewById(R.id.total_amount)
-        totalCallsView.text = statsProvider.computeTotal(data)
+        if (data.isEmpty()) {
+            chart.data = null
+            chart.invalidate()
+            return
+        }
 
-        val chart: HorizontalBarChart = view!!.findViewById(R.id.chart)
         val xValues = statsProvider.getXValues(data)
         chart.xAxis.labelCount = xValues.size
         chart.xAxis.valueFormatter = IndexAxisValueFormatter(xValues)

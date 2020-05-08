@@ -69,3 +69,13 @@ fun Long.toPrettyDuration(withSeconds: Boolean = true): String {
 fun Long.toPrettyByteSize(context: Context): String {
     return formatShortFileSize(context, this)
 }
+
+fun <T> List<T>.nLast(n: Int, operation: (acc: T, T) -> T): List<T> {
+    if (size > n) {
+        val keepNIndex = size - n
+        val toMerge = subList(0, keepNIndex)
+        val reduced = toMerge.reduce(operation)
+        return listOf(reduced) + subList(keepNIndex, size)
+    }
+    return this
+}

@@ -12,7 +12,7 @@ import java.time.LocalDateTime
 import java.time.LocalDateTime.now
 
 
-data class AppUsage(val appName: String, val appIcon: Drawable?, val stats: UsageStats)
+data class AppUsage(val appName: String, val appIcon: Drawable?, val totalForegroundMs: Long)
 
 fun getAppUsage(context: Context, startDate: LocalDateTime = now().atMidnight(), endDate: LocalDateTime = now()): Map<String, UsageStats> {
     val usm = context.getSystemService(UsageStatsManager::class.java) ?: throw IllegalStateException("Could not find UsageStatsManager")
@@ -31,6 +31,6 @@ fun generateStats(context: Context, appUsageStats: Map<String, UsageStats>): Lis
             info?.let { i -> i to it.value }
         }
         .filter { it.first.flags and ApplicationInfo.FLAG_SYSTEM == 0 } // Filter out system apps
-        .map { AppUsage(packageManager.getApplicationLabel(it.first).toString(), packageManager.getApplicationIcon(it.first), it.second) }
+        .map { AppUsage(packageManager.getApplicationLabel(it.first).toString(), packageManager.getApplicationIcon(it.first), it.second.totalTimeInForeground) }
         .toList()
 }

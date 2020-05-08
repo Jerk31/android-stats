@@ -8,10 +8,7 @@ import android.provider.CallLog
 import android.view.View
 import androidx.core.app.ActivityCompat.requestPermissions
 import androidx.core.content.PermissionChecker
-import com.example.android.stats.R
-import com.example.android.stats.StatsProvider
-import com.example.android.stats.findTextView
-import com.example.android.stats.toPrettyDuration
+import com.example.android.stats.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.time.LocalDateTime
@@ -44,19 +41,14 @@ class CallsStats(private val context: Context) : StatsProvider<IndividualCallSta
 
         return withContext(Dispatchers.IO) {
             val callLogs = getCallLogs(context, startDate = range.first, endDate = range.second)
-            var sortedStats = generateStats(callLogs).sortedBy(IndividualCallStats::totalTime)
-            // Limit to 10 visible items
-            if (sortedStats.size > 10) {
-                val keep10Index = sortedStats.size - 10
-                val toMerge = sortedStats.subList(0, keep10Index)
-                val reduced = toMerge.reduce { left, right ->
+            return@withContext generateStats(callLogs)
+                .sortedBy(IndividualCallStats::totalTime)
+                // If list > n items, merge the first ones (since list is ordered by biggest total time at the end, we only keep the biggest ones)
+                .nLast(15) { left, right ->
                     val mergedStats = IndividualCallStats("Other")
                     (right.calls + left.calls).forEach { mergedStats.addCall(it) }
                     mergedStats
                 }
-                sortedStats = listOf(reduced) + sortedStats.subList(keep10Index, sortedStats.size)
-            }
-            return@withContext sortedStats
         }
     }
 

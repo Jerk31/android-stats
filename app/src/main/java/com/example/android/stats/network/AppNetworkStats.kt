@@ -54,20 +54,15 @@ class AppNetworkStats(private val context: Context) : StatsProvider<AppNetwork> 
         }
 
         return withContext(Dispatchers.IO) {
-            var sortedStats = getNetworkStats(context, range.first, range.second)
-                .filter { getReceivedBytes(it) > 1024 * 1024 } // 1Mo
+            return@withContext getNetworkStats(context, range.first, range.second)
+                .filter { getReceivedBytes(it) > 1024 * 1024 } // Only keep > 1Mo
                 .sortedBy { getReceivedBytes(it) }
-            if (sortedStats.size > 10) {
-                val keep10Index = sortedStats.size - 10
-                val toMerge = sortedStats.subList(0, keep10Index)
-                val reduced = toMerge.reduce { left, right ->
+                // If list > n items, merge the first ones (since list is ordered by biggest total time at the end, we only keep the biggest ones)
+                .nLast(15) { left, right ->
                     val mobileStats = left.mobileStats?.plus(right.mobileStats) ?: right.mobileStats
                     val wifiStats = left.wifiStats?.plus(right.wifiStats) ?: right.wifiStats
                     AppNetwork("Other", null, mobileStats, wifiStats)
                 }
-                sortedStats = listOf(reduced) + sortedStats.subList(keep10Index, sortedStats.size)
-            }
-            return@withContext sortedStats
         }
     }
 
