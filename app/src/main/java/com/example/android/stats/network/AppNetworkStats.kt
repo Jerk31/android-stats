@@ -10,6 +10,8 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.PermissionChecker
 import com.example.android.stats.*
 import com.example.android.stats.calls.CallsStats
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.time.LocalDateTime
 
 class AppNetworkStats(private val context: Context) : StatsProvider<AppNetwork> {
@@ -46,17 +48,20 @@ class AppNetworkStats(private val context: Context) : StatsProvider<AppNetwork> 
         return requestCode == PERMISSIONS_CODE && grantResults.isNotEmpty() && grantResults.all { it == PackageManager.PERMISSION_GRANTED }
     }
 
-    override fun getDataForRange(range: Pair<LocalDateTime, LocalDateTime>): List<AppNetwork> {
+    override suspend fun getDataForRange(range: Pair<LocalDateTime, LocalDateTime>): List<AppNetwork> {
         if (!checkRuntimePermissions()) {
             return emptyList()
         }
-        var sortedStats = getNetworkStats(context, range.first, range.second)
-            .filter { getReceivedBytes(it) > 0L }
-            .sortedBy { getReceivedBytes(it) }
-        if (sortedStats.size > 10) {
-            sortedStats = sortedStats.filter { getReceivedBytes(it) > 1024 * 1024 } // > 1Mo
+
+        return withContext(Dispatchers.IO) {
+            var sortedStats = getNetworkStats(context, range.first, range.second)
+                .filter { getReceivedBytes(it) > 0L }
+                .sortedBy { getReceivedBytes(it) }
+            if (sortedStats.size > 10) {
+                sortedStats = sortedStats.filter { getReceivedBytes(it) > 1024 * 1024 } // > 1Mo
+            }
+            return@withContext sortedStats
         }
-        return sortedStats
     }
 
     override fun getTotalText(): String {

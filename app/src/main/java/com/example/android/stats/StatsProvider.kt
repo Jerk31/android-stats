@@ -12,7 +12,7 @@ interface StatsProvider<T> {
     fun onRuntimePermissionsUpdated(requestCode: Int, permissions: Array<out String>, grantResults: IntArray): Boolean
 
     // Range selection
-    fun getDataForRange(range: Pair<LocalDateTime, LocalDateTime>): List<T>
+    suspend fun getDataForRange(range: Pair<LocalDateTime, LocalDateTime>): List<T>
 
     // Total
     fun getTotalText(): String

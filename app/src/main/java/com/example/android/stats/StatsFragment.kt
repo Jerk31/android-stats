@@ -19,10 +19,12 @@ import com.github.mikephil.charting.highlight.HorizontalBarHighlighter
 import com.github.mikephil.charting.interfaces.datasets.IDataSet
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener
 import com.github.mikephil.charting.utils.ColorTemplate
+import kotlinx.android.synthetic.main.progress_overlay.*
 import kotlinx.android.synthetic.main.stats.*
+import kotlinx.coroutines.*
 import java.time.LocalDateTime
 
-class StatsFragment<T>(private var statsProvider: StatsProvider<T>) : Fragment() {
+class StatsFragment<T>(private var statsProvider: StatsProvider<T>) : Fragment(), CoroutineScope by MainScope() {
     private var timeRange: Pair<LocalDateTime, LocalDateTime>? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -45,6 +47,20 @@ class StatsFragment<T>(private var statsProvider: StatsProvider<T>) : Fragment()
     override fun onResume() {
         super.onResume()
         timeRange?.let { onRangeSelected(it) }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        cancel()
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (statsProvider.onRuntimePermissionsUpdated(requestCode, permissions, grantResults)) {
+            timeRange?.let { onRangeSelected(it) }
+        } else {
+            Log.e("StatsFragment", "NotEnoughPermissions to display data")
+        }
     }
 
     private fun setUpView(v: View) {
@@ -123,11 +139,19 @@ class StatsFragment<T>(private var statsProvider: StatsProvider<T>) : Fragment()
     }
 
     fun onRangeSelected(timeRange: Pair<LocalDateTime, LocalDateTime>) {
+        this.timeRange = timeRange
         showHideDetailedStats(false)
         resetChart(chart)
+        progress_overlay.animate(View.VISIBLE, 0.4f, 200)
 
-        this.timeRange = timeRange
-        val data = statsProvider.getDataForRange(timeRange)
+        launch {
+            // See https://heartbeat.fritz.ai/handling-background-tasks-with-kotlin-coroutines-in-android-a674bab7a951
+            fetchDataInBackground(timeRange)
+        }
+    }
+
+    private fun onDataFetched(data: List<T>) {
+        progress_overlay.animate(View.GONE, 0f, 200)
 
         val totalCallsView: TextView = view!!.findViewById(R.id.total_amount)
         totalCallsView.text = statsProvider.computeTotal(data)
@@ -157,17 +181,16 @@ class StatsFragment<T>(private var statsProvider: StatsProvider<T>) : Fragment()
         chart.invalidate()
     }
 
-    fun displayDetailedStats(data: T) {
+    private fun displayDetailedStats(data: T) {
         showHideDetailedStats(true)
         statsProvider.showDetailedStats(detailed_stats_card, data)
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (statsProvider.onRuntimePermissionsUpdated(requestCode, permissions, grantResults)) {
-            timeRange?.let { onRangeSelected(it) }
-        } else {
-            Log.e("StatsFragment", "NotEnoughPermissions to display data")
+    private suspend fun fetchDataInBackground(timeRange: Pair<LocalDateTime, LocalDateTime>) {
+        // Fetch data in IO dispatcher, then display them in Main dispatcher when available
+        val data = statsProvider.getDataForRange(timeRange)
+        withContext(Dispatchers.Main) {
+            onDataFetched(data)
         }
     }
 

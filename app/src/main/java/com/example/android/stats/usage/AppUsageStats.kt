@@ -4,6 +4,8 @@ import android.app.AppOpsManager
 import android.content.Context
 import android.view.View
 import com.example.android.stats.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.time.LocalDateTime
 import java.util.concurrent.TimeUnit.MILLISECONDS
 
@@ -24,16 +26,19 @@ class AppUsageStats(private val context: Context) : StatsProvider<AppUsage> {
         return true
     }
 
-    override fun getDataForRange(range: Pair<LocalDateTime, LocalDateTime>): List<AppUsage> {
+    override suspend fun getDataForRange(range: Pair<LocalDateTime, LocalDateTime>): List<AppUsage> {
         if (!checkRuntimePermissions()) {
             return emptyList()
         }
-        val appUsage = getAppUsage(context, range.first, range.second).filter { it.value.totalTimeInForeground > 0L }
-        var sortedStats = generateStats(context, appUsage).sortedBy { it.stats.totalTimeInForeground }
-        if (appUsage.keys.size > 10) {
-            sortedStats = sortedStats.filter { MILLISECONDS.toMinutes(it.stats.totalTimeInForeground) > 5 }
+
+        return withContext(Dispatchers.IO) {
+            val appUsage = getAppUsage(context, range.first, range.second).filter { it.value.totalTimeInForeground > 0L }
+            var sortedStats = generateStats(context, appUsage).sortedBy { it.stats.totalTimeInForeground }
+            if (appUsage.keys.size > 10) {
+                sortedStats = sortedStats.filter { MILLISECONDS.toMinutes(it.stats.totalTimeInForeground) > 5 }
+            }
+            return@withContext sortedStats
         }
-        return sortedStats
     }
 
     override fun getTotalText(): String {

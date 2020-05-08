@@ -12,6 +12,8 @@ import com.example.android.stats.R
 import com.example.android.stats.StatsProvider
 import com.example.android.stats.findTextView
 import com.example.android.stats.toPrettyDuration
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.time.LocalDateTime
 
 class CallsStats(private val context: Context) : StatsProvider<IndividualCallStats> {
@@ -35,24 +37,26 @@ class CallsStats(private val context: Context) : StatsProvider<IndividualCallSta
         return requestCode == PERMISSIONS_CODE && grantResults.isNotEmpty() && grantResults.all { it == PackageManager.PERMISSION_GRANTED }
     }
 
-    override fun getDataForRange(range: Pair<LocalDateTime, LocalDateTime>): List<IndividualCallStats> {
+    override suspend fun getDataForRange(range: Pair<LocalDateTime, LocalDateTime>): List<IndividualCallStats> {
         if (!checkRuntimePermissions()) {
             return emptyList()
         }
 
-        val callLogs = getCallLogs(context, startDate = range.first, endDate = range.second)
-        var sortedStats = generateStats(callLogs).sortedBy(IndividualCallStats::totalTime)
-        // Limit to 10 visible items
-        if (sortedStats.size > 10) {
-            val toMerge = sortedStats.subList(10, sortedStats.size)
-            val reduced = toMerge.reduce { left, right ->
-                right.calls.forEach { left.addCall(it) }
-                left.name = "Other"
-                left
+        return withContext(Dispatchers.IO) {
+            val callLogs = getCallLogs(context, startDate = range.first, endDate = range.second)
+            var sortedStats = generateStats(callLogs).sortedBy(IndividualCallStats::totalTime)
+            // Limit to 10 visible items
+            if (sortedStats.size > 10) {
+                val toMerge = sortedStats.subList(10, sortedStats.size)
+                val reduced = toMerge.reduce { left, right ->
+                    right.calls.forEach { left.addCall(it) }
+                    left.name = "Other"
+                    left
+                }
+                sortedStats = sortedStats.subList(0, 9) + reduced
             }
-            sortedStats = sortedStats.subList(0, 9) + reduced
+            return@withContext sortedStats
         }
-        return sortedStats
     }
 
     override fun getTotalText(): String {

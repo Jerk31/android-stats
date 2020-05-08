@@ -1,5 +1,7 @@
 package com.example.android.stats
 
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
 import android.content.Context
 import android.text.format.Formatter.formatShortFileSize
 import android.view.View
@@ -10,12 +12,29 @@ import java.time.LocalDateTime
 import java.time.ZoneId
 import java.util.*
 
+
 fun View.findImageView(id: Int): ImageView {
     return findViewById(id)
 }
 
 fun View.findTextView(id: Int): TextView {
     return findViewById(id)
+}
+
+fun View.animate(toVisibility: Int, toAlpha: Float, duration: Int) {
+    val show = toVisibility == View.VISIBLE
+    if (show) {
+        alpha = 0f
+    }
+    visibility = View.VISIBLE
+    animate()
+        .setDuration(duration.toLong())
+        .alpha(if (show) toAlpha else 0f)
+        .setListener(object : AnimatorListenerAdapter() {
+            override fun onAnimationEnd(animation: Animator) {
+                visibility = toVisibility
+            }
+        })
 }
 
 fun LocalDateTime.toDate(): Date {
