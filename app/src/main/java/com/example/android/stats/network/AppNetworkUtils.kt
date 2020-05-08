@@ -1,4 +1,4 @@
-package com.example.android.stats.appnetwork
+package com.example.android.stats.network
 
 import android.annotation.SuppressLint
 import android.app.usage.NetworkStatsManager

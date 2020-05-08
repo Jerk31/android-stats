@@ -14,9 +14,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.bundleOf
 import androidx.core.view.GravityCompat
 import androidx.fragment.app.FragmentTransaction
-import com.example.android.stats.appnetwork.AppNetworkStats
-import com.example.android.stats.appusage.AppUsageStats
 import com.example.android.stats.calls.CallsStats
+import com.example.android.stats.network.AppNetworkStats
+import com.example.android.stats.usage.AppUsageStats
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.navigation.NavigationView
 import kotlinx.android.synthetic.main.activity_main.*

@@ -1,4 +1,4 @@
-package com.example.android.stats.appusage
+package com.example.android.stats.usage
 
 import android.app.usage.UsageStats
 import android.app.usage.UsageStatsManager

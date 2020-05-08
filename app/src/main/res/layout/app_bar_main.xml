@@ -15,7 +15,7 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:theme="@style/Theme.MaterialComponents.DayNight.DarkActionBar"
-            app:title="@string/calls_page_title"
+            app:title="@string/app_name"
             app:menu="@menu/top_app_bar"
             app:navigationIcon="@drawable/ic_menu_black_24dp"
             style="@style/Widget.MaterialComponents.Toolbar.Primary" />

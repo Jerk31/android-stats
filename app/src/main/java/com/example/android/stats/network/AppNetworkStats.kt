@@ -1,4 +1,4 @@
-package com.example.android.stats.appnetwork
+package com.example.android.stats.network
 
 import android.Manifest
 import android.app.Activity
@@ -18,7 +18,7 @@ class AppNetworkStats(private val context: Context) : StatsProvider<AppNetwork> 
     }
 
     override fun getPageTitle(): String {
-        return context.getString(R.string.appnetwork_page_title)
+        return context.getString(R.string.network_page_title)
     }
 
     private fun modeOk(): Boolean {
@@ -60,7 +60,7 @@ class AppNetworkStats(private val context: Context) : StatsProvider<AppNetwork> 
     }
 
     override fun getTotalText(): String {
-        return context.getString(R.string.appnetwork_total)
+        return context.getString(R.string.network_total)
     }
 
     override fun getTotalIcon(): Int {
@@ -74,7 +74,7 @@ class AppNetworkStats(private val context: Context) : StatsProvider<AppNetwork> 
     }
 
     override fun getStatsText(): String {
-        return context.getString(R.string.appnetwork_stats_title)
+        return context.getString(R.string.network_stats_title)
     }
 
     override fun getXValues(data: List<AppNetwork>): List<String> {
@@ -91,7 +91,7 @@ class AppNetworkStats(private val context: Context) : StatsProvider<AppNetwork> 
     }
 
     override fun getDetailedStatsLayout(): Int {
-        return R.layout.appnetwork_detailed_stats
+        return R.layout.network_detailed_stats
     }
 
     override fun showDetailedStats(v: View, selected: AppNetwork) {

@@ -88,6 +88,7 @@ class StatsFragment<T>(private var statsProvider: StatsProvider<T>) : Fragment()
         })
         chart.setOnChartValueSelectedListener(object : OnChartValueSelectedListener {
             override fun onNothingSelected() {
+                showHideDetailedStats(false)
             }
 
             @Suppress("UNCHECKED_CAST")
@@ -121,13 +122,8 @@ class StatsFragment<T>(private var statsProvider: StatsProvider<T>) : Fragment()
         yRight.isEnabled = false
     }
 
-    private fun resetChart(chart: HorizontalBarChart) {
-        chart.fitScreen()
-        chart.clear()
-    }
-
     fun onRangeSelected(timeRange: Pair<LocalDateTime, LocalDateTime>) {
-        detailed_stats_card.visibility = View.INVISIBLE
+        showHideDetailedStats(false)
         resetChart(chart)
 
         this.timeRange = timeRange
@@ -162,7 +158,7 @@ class StatsFragment<T>(private var statsProvider: StatsProvider<T>) : Fragment()
     }
 
     fun displayDetailedStats(data: T) {
-        detailed_stats_card.visibility = View.VISIBLE
+        showHideDetailedStats(true)
         statsProvider.showDetailedStats(detailed_stats_card, data)
     }
 
@@ -173,5 +169,15 @@ class StatsFragment<T>(private var statsProvider: StatsProvider<T>) : Fragment()
         } else {
             Log.e("StatsFragment", "NotEnoughPermissions to display data")
         }
+    }
+
+    private fun resetChart(chart: HorizontalBarChart) {
+        chart.fitScreen()
+        chart.clear()
+    }
+
+    private fun showHideDetailedStats(show: Boolean) {
+        details_placeholder_card.visibility = if (show) View.GONE else View.VISIBLE
+        detailed_stats_card.visibility = if (show) View.VISIBLE else View.GONE
     }
 }

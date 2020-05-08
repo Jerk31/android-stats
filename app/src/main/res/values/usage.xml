@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="usage_page_title">App Usage</string>
+    <string name="usage_total">Total application usage</string>
+    <string name="usage_stats_title">Applications</string>
+    <string name="screen_time">Screen time</string>
+</resources>

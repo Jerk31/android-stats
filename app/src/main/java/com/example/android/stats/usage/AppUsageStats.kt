@@ -1,4 +1,4 @@
-package com.example.android.stats.appusage
+package com.example.android.stats.usage
 
 import android.app.AppOpsManager
 import android.content.Context
@@ -9,7 +9,7 @@ import java.util.concurrent.TimeUnit.MILLISECONDS
 
 class AppUsageStats(private val context: Context) : StatsProvider<AppUsage> {
     override fun getPageTitle(): String {
-        return context.getString(R.string.appusage_page_title)
+        return context.getString(R.string.usage_page_title)
     }
 
     override fun checkRuntimePermissions(): Boolean {
@@ -37,11 +37,11 @@ class AppUsageStats(private val context: Context) : StatsProvider<AppUsage> {
     }
 
     override fun getTotalText(): String {
-        return context.getString(R.string.appusage_total)
+        return context.getString(R.string.usage_total)
     }
 
     override fun getTotalIcon(): Int {
-        return android.R.drawable.sym_def_app_icon
+        return R.drawable.ic_access_time_black_30dp
     }
 
     override fun computeTotal(data: List<AppUsage>): String {
@@ -49,7 +49,7 @@ class AppUsageStats(private val context: Context) : StatsProvider<AppUsage> {
     }
 
     override fun getStatsText(): String {
-        return context.getString(R.string.appusage_stats_title)
+        return context.getString(R.string.usage_stats_title)
     }
 
     override fun getXValues(data: List<AppUsage>): List<String> {
@@ -64,7 +64,7 @@ class AppUsageStats(private val context: Context) : StatsProvider<AppUsage> {
     }
 
     override fun getDetailedStatsLayout(): Int {
-        return R.layout.appusage_detailed_stats
+        return R.layout.usage_detailed_stats
     }
 
     override fun showDetailedStats(v: View, selected: AppUsage) {
