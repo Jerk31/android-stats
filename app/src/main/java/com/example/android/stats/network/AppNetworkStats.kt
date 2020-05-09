@@ -5,6 +5,7 @@ import android.app.Activity
 import android.app.AppOpsManager
 import android.content.Context
 import android.content.pm.PackageManager
+import android.os.Build
 import android.view.View
 import androidx.core.app.ActivityCompat
 import androidx.core.content.PermissionChecker
@@ -28,7 +29,11 @@ class AppNetworkStats(private val context: Context) : StatsProvider<AppNetwork> 
     }
 
     private fun permissionsOk(): Boolean {
-        return PermissionChecker.checkSelfPermission(context, Manifest.permission.READ_PHONE_STATE) == PermissionChecker.PERMISSION_GRANTED
+        return if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+            PermissionChecker.checkSelfPermission(context, Manifest.permission.READ_PHONE_STATE) == PermissionChecker.PERMISSION_GRANTED
+        } else {
+            true
+        }
     }
 
     override fun checkRuntimePermissions(): Boolean {

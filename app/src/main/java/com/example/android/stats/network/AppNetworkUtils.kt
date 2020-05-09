@@ -7,11 +7,13 @@ import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
 import android.net.ConnectivityManager
-import android.provider.Settings
+import android.os.Build
+import android.telephony.TelephonyManager
 import com.example.android.stats.atMidnight
 import com.example.android.stats.toDate
 import java.time.LocalDateTime
 import java.time.LocalDateTime.now
+
 
 data class NetworkStats(val rxBytes: Long, val txBytes: Long) {
     operator fun plus(other: NetworkStats?): NetworkStats {
@@ -73,6 +75,11 @@ fun getNetworkStats(context: Context, startDate: LocalDateTime = now().atMidnigh
 }
 
 @SuppressLint("HardwareIds", "MissingPermission")
-private fun getDeviceId(context: Context): String {
-    return Settings.Secure.getString(context.contentResolver, Settings.Secure.ANDROID_ID)
+private fun getDeviceId(context: Context): String? {
+    return if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+        val telephonyManager = context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
+        telephonyManager.subscriberId
+    } else {
+        null
+    }
 }

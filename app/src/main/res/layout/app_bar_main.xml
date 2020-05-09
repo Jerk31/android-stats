@@ -14,10 +14,10 @@
             android:id="@+id/topAppBar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:theme="@style/Theme.MaterialComponents.DayNight.DarkActionBar"
+            android:theme="@style/AppBarTheme"
             app:title="@string/app_name"
             app:menu="@menu/top_app_bar"
-            app:navigationIcon="@drawable/ic_menu_black_24dp"
+            app:navigationIcon="@drawable/ic_menu_white_24dp"
             style="@style/Widget.MaterialComponents.Toolbar.Primary" />
     </com.google.android.material.appbar.AppBarLayout>
 

@@ -4,4 +4,8 @@
     <style name="AppTheme" parent="@style/Theme.MaterialComponents.NoActionBar">
         <!-- Customize your theme here. -->
     </style>
+
+    <style name="AppBarTheme" parent="@style/Theme.MaterialComponents.DayNight.DarkActionBar">
+        <item name="colorControlNormal">@color/design_default_color_on_primary</item>
+    </style>
 </resources>
