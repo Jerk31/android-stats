@@ -141,9 +141,9 @@ class StatsFragment<T>(private var statsProvider: StatsProvider<T>) : Fragment()
 
     fun onRangeSelected(timeRange: Pair<LocalDateTime, LocalDateTime>) {
         this.timeRange = timeRange
+        missing_permissions_card.visibility = View.GONE
         showHideDetailedStats(false)
         resetChart(chart)
-        progress_overlay.animate(View.VISIBLE, 0.4f, 200)
 
         launch {
             // See https://heartbeat.fritz.ai/handling-background-tasks-with-kotlin-coroutines-in-android-a674bab7a951
@@ -152,7 +152,6 @@ class StatsFragment<T>(private var statsProvider: StatsProvider<T>) : Fragment()
     }
 
     private fun onDataFetched(data: List<T>) {
-        progress_overlay.animate(View.GONE, 0f, 200)
         total_amount.text = statsProvider.computeTotal(data)
 
         if (data.isEmpty()) {
@@ -190,10 +189,29 @@ class StatsFragment<T>(private var statsProvider: StatsProvider<T>) : Fragment()
         statsProvider.showDetailedStats(detailed_stats_card, data)
     }
 
+    private fun onMissingPermissions() {
+        missing_permissions_card.visibility = View.VISIBLE
+        missing_permissions_text.text = statsProvider.getMissingPermissionsMessage()
+    }
+
     private suspend fun fetchDataInBackground(timeRange: Pair<LocalDateTime, LocalDateTime>) {
-        // Fetch data in IO dispatcher, then display them in Main dispatcher when available
-        val data = statsProvider.getDataForRange(timeRange)
+        if (!statsProvider.checkRuntimePermissions()) {
+            withContext(Dispatchers.Main) {
+                onMissingPermissions()
+            }
+            return
+        }
+
         withContext(Dispatchers.Main) {
+            progress_overlay.animate(View.VISIBLE, 0.4f, 200)
+        }
+
+        // Fetch data in IO dispatcher, then display them in Main dispatcher when available
+        val data = withContext(Dispatchers.IO) {
+            statsProvider.getDataForRange(timeRange)
+        }
+        withContext(Dispatchers.Main) {
+            progress_overlay.animate(View.GONE, 0f, 200)
             onDataFetched(data)
         }
     }

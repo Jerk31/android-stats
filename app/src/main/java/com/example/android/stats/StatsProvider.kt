@@ -10,6 +10,7 @@ interface StatsProvider<T> {
     fun checkRuntimePermissions(): Boolean
     fun requestPermissions()
     fun onRuntimePermissionsUpdated(requestCode: Int, permissions: Array<out String>, grantResults: IntArray): Boolean
+    fun getMissingPermissionsMessage(): String
 
     // Range selection
     suspend fun getDataForRange(range: Pair<LocalDateTime, LocalDateTime>): List<T>

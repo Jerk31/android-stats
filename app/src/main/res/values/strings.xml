@@ -5,6 +5,9 @@
 
     <string name="detailed_stats_placeholder">Select an item to show detailed stats</string>
     <string name="detailed_stats_for">Detailed stats for %s</string>
+
+    <string name="missing_permissions">Permissions are missing to display this view %s</string>
+
     <string name="app_icon">Application icon</string>
 
     <string name="today">Today</string>

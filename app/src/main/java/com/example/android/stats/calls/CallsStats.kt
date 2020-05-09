@@ -9,8 +9,6 @@ import android.view.View
 import androidx.core.app.ActivityCompat.requestPermissions
 import androidx.core.content.PermissionChecker
 import com.example.android.stats.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import java.time.LocalDateTime
 
 class CallsStats(private val context: Context) : StatsProvider<IndividualCallStats> {
@@ -34,22 +32,20 @@ class CallsStats(private val context: Context) : StatsProvider<IndividualCallSta
         return requestCode == PERMISSIONS_CODE && grantResults.isNotEmpty() && grantResults.all { it == PackageManager.PERMISSION_GRANTED }
     }
 
-    override suspend fun getDataForRange(range: Pair<LocalDateTime, LocalDateTime>): List<IndividualCallStats> {
-        if (!checkRuntimePermissions()) {
-            return emptyList()
-        }
+    override fun getMissingPermissionsMessage(): String {
+        return context.getString(R.string.missing_permissions).format("READ_CALL_LOG")
+    }
 
-        return withContext(Dispatchers.IO) {
-            val callLogs = getCallLogs(context, startDate = range.first, endDate = range.second)
-            return@withContext generateStats(callLogs)
-                .sortedBy(IndividualCallStats::totalTime)
-                // If list > n items, merge the first ones (since list is ordered by biggest total time at the end, we only keep the biggest ones)
-                .nLast(15) { left, right ->
-                    val mergedStats = IndividualCallStats("Other")
-                    (right.calls + left.calls).forEach { mergedStats.addCall(it) }
-                    mergedStats
-                }
-        }
+    override suspend fun getDataForRange(range: Pair<LocalDateTime, LocalDateTime>): List<IndividualCallStats> {
+        val callLogs = getCallLogs(context, startDate = range.first, endDate = range.second)
+        return generateStats(callLogs)
+            .sortedBy(IndividualCallStats::totalTime)
+            // If list > n items, merge the first ones (since list is ordered by biggest total time at the end, we only keep the biggest ones)
+            .nLast(15) { left, right ->
+                val mergedStats = IndividualCallStats("Other")
+                (right.calls + left.calls).forEach { mergedStats.addCall(it) }
+                mergedStats
+            }
     }
 
     override fun getTotalText(): String {

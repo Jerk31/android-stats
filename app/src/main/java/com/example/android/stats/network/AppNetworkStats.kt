@@ -11,8 +11,6 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.PermissionChecker
 import com.example.android.stats.*
 import com.example.android.stats.calls.CallsStats
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import java.time.LocalDateTime
 
 class AppNetworkStats(private val context: Context) : StatsProvider<AppNetwork> {
@@ -53,22 +51,28 @@ class AppNetworkStats(private val context: Context) : StatsProvider<AppNetwork> 
         return requestCode == PERMISSIONS_CODE && grantResults.isNotEmpty() && grantResults.all { it == PackageManager.PERMISSION_GRANTED }
     }
 
-    override suspend fun getDataForRange(range: Pair<LocalDateTime, LocalDateTime>): List<AppNetwork> {
-        if (!checkRuntimePermissions()) {
-            return emptyList()
+    override fun getMissingPermissionsMessage(): String {
+        val missingPermissionsTemplate = context.getString(R.string.missing_permissions)
+        val missingPermissions = arrayListOf<String>()
+        if (!permissionsOk()) {
+            missingPermissions.add("READ_PHONE_STATE")
         }
+        if (!modeOk()) {
+            missingPermissions.add("GET_USAGE_STATS")
+        }
+        return missingPermissionsTemplate.format(missingPermissions.joinToString())
+    }
 
-        return withContext(Dispatchers.IO) {
-            return@withContext getNetworkStats(context, range.first, range.second)
-                .filter { getReceivedBytes(it) > 1024 * 1024 } // Only keep > 1Mo
-                .sortedBy { getReceivedBytes(it) }
-                // If list > n items, merge the first ones (since list is ordered by biggest total time at the end, we only keep the biggest ones)
-                .nLast(15) { left, right ->
-                    val mobileStats = left.mobileStats?.plus(right.mobileStats) ?: right.mobileStats
-                    val wifiStats = left.wifiStats?.plus(right.wifiStats) ?: right.wifiStats
-                    AppNetwork("Other", null, mobileStats, wifiStats)
-                }
-        }
+    override suspend fun getDataForRange(range: Pair<LocalDateTime, LocalDateTime>): List<AppNetwork> {
+        return getNetworkStats(context, range.first, range.second)
+            .filter { getReceivedBytes(it) > 1024 * 1024 } // Only keep > 1Mo
+            .sortedBy { getReceivedBytes(it) }
+            // If list > n items, merge the first ones (since list is ordered by biggest total time at the end, we only keep the biggest ones)
+            .nLast(15) { left, right ->
+                val mobileStats = left.mobileStats?.plus(right.mobileStats) ?: right.mobileStats
+                val wifiStats = left.wifiStats?.plus(right.wifiStats) ?: right.wifiStats
+                AppNetwork("Other", null, mobileStats, wifiStats)
+            }
     }
 
     override fun getTotalText(): String {

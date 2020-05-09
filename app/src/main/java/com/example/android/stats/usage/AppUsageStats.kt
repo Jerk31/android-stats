@@ -4,8 +4,6 @@ import android.app.AppOpsManager
 import android.content.Context
 import android.view.View
 import com.example.android.stats.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import java.time.LocalDateTime
 import java.util.concurrent.TimeUnit.MILLISECONDS
 
@@ -26,20 +24,18 @@ class AppUsageStats(private val context: Context) : StatsProvider<AppUsage> {
         return true
     }
 
-    override suspend fun getDataForRange(range: Pair<LocalDateTime, LocalDateTime>): List<AppUsage> {
-        if (!checkRuntimePermissions()) {
-            return emptyList()
-        }
+    override fun getMissingPermissionsMessage(): String {
+        return context.getString(R.string.missing_permissions).format("GET_USAGE_STATS")
+    }
 
-        return withContext(Dispatchers.IO) {
-            val appUsage = getAppUsage(context, range.first, range.second).filter { it.value.totalTimeInForeground > 0L }
-            return@withContext generateStats(context, appUsage)
-                .filter { MILLISECONDS.toMinutes(it.totalForegroundMs) > 5 } // Keep only applications whose usage is > 5min
-                .sortedBy { it.totalForegroundMs }
-                .nLast(15) { left, right ->
-                    AppUsage("Other", null, left.totalForegroundMs + right.totalForegroundMs)
-                }
-        }
+    override suspend fun getDataForRange(range: Pair<LocalDateTime, LocalDateTime>): List<AppUsage> {
+        val appUsage = getAppUsage(context, range.first, range.second).filter { it.value.totalTimeInForeground > 0L }
+        return generateStats(context, appUsage)
+            .filter { MILLISECONDS.toMinutes(it.totalForegroundMs) > 5 } // Keep only applications whose usage is > 5min
+            .sortedBy { it.totalForegroundMs }
+            .nLast(15) { left, right ->
+                AppUsage("Other", null, left.totalForegroundMs + right.totalForegroundMs)
+            }
     }
 
     override fun getTotalText(): String {
