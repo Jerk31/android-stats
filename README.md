@@ -2,7 +2,7 @@
 
 ## About
 
-Android-Stats is an Android application aimed at displaying statics such as
+Android-Stats is an Android application aimed at displaying statistics such as
 - Calls
 - SMS / MMS
 - Application screen time
@@ -26,7 +26,7 @@ Each stat view is responsible for handling required permissions.
 The following ones are currently in-use:
 - READ_CALL_LOG: allows to access call history
 - PACKAGE_USAGE_STATS: allows to access application usage (screen time, network, ...)
-- READ_PHONE_STATE: on android < Q this is mandatory to get mobile network usage
+- READ_PHONE_STATE: on Android < Q this is mandatory to get mobile network usage
 
 ## Contributing
 
