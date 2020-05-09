@@ -17,8 +17,8 @@ fun checkModePermission(context: Context, permission: String): Boolean {
 }
 
 fun requestUsageAccess(context: Context) {
-    MaterialAlertDialogBuilder(context)
-        .setMessage("This view requires usage stats permission. Grant it in next view and click <back> to come back!")
+    MaterialAlertDialogBuilder(context, R.style.ThemeOverlay_MaterialComponents_Light)
+        .setMessage("This view requires usage stats permission. Click OK to grant it, then <back> to come back!")
         .setPositiveButton("OK") { _, _ -> context.startActivity(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)) }
         .show()
 }

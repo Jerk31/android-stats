@@ -7,9 +7,7 @@ import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
 import android.net.ConnectivityManager
-import android.os.Build
 import android.provider.Settings
-import android.telephony.TelephonyManager
 import com.example.android.stats.atMidnight
 import com.example.android.stats.toDate
 import java.time.LocalDateTime
@@ -76,9 +74,5 @@ fun getNetworkStats(context: Context, startDate: LocalDateTime = now().atMidnigh
 
 @SuppressLint("HardwareIds", "MissingPermission")
 private fun getDeviceId(context: Context): String {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-        return Settings.Secure.getString(context.contentResolver, Settings.Secure.ANDROID_ID)
-    }
-    val tm = context.getSystemService(TelephonyManager::class.java) ?: throw IllegalStateException("Could not find TelephonyManager")
-    return tm.subscriberId
+    return Settings.Secure.getString(context.contentResolver, Settings.Secure.ANDROID_ID)
 }
