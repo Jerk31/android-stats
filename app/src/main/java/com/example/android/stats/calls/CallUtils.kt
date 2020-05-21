@@ -64,7 +64,7 @@ fun getCallLogs(context: Context, startDate: LocalDateTime? = null, endDate: Loc
 fun generateStats(callLogs: List<CallLogInfo>): List<IndividualCallStats> {
     return callLogs
         .groupingBy { it.name ?: it.number }
-        .fold({ k, e -> IndividualCallStats(k).addCall(e) }) { _, acc, e -> acc.addCall(e) }
+        .fold({ k, _ -> IndividualCallStats(k) }) { _, acc, e -> acc.addCall(e) }
         .values
         .toList()
 }
