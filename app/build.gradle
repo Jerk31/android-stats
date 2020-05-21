@@ -14,7 +14,9 @@ android {
         applicationId 'com.example.android.stats'
         minSdkVersion 26
         targetSdkVersion 29
-        versionCode 1
+        // Version code should be increased for each new release
+        versionCode 2
+        // Version name is the one shown to users
         versionName "1.0.1"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
