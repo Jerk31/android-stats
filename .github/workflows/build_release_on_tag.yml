@@ -29,7 +29,7 @@ jobs:
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
-          envsubst < keystore.properties > keystore.properties
+          envsubst < keystore.properties.template > keystore.properties
           bash ./gradlew assembleRelease
 
       # Create release
