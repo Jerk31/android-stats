@@ -23,7 +23,7 @@ jobs:
         uses: actions/setup-java@v1.3.0
         with:
           java-version: 1.8
-      - name: Build debug APK
+      - name: Build Release APK
         env:
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
@@ -52,6 +52,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./app/release/app-release.apk
+          asset_path: ./app/build/outputs/apk/release/app-release.apk
           asset_name: android-stats-${{ steps.get_version.outputs.VERSION }}.apk
           asset_content_type: application/apk
