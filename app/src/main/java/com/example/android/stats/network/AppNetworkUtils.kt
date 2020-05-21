@@ -3,7 +3,6 @@ package com.example.android.stats.network
 import android.annotation.SuppressLint
 import android.app.usage.NetworkStatsManager
 import android.content.Context
-import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
 import android.net.ConnectivityManager
@@ -11,6 +10,7 @@ import android.os.Build
 import android.telephony.TelephonyManager
 import com.example.android.stats.atMidnight
 import com.example.android.stats.toDate
+import com.example.android.stats.usage.isSystemApp
 import java.time.LocalDateTime
 import java.time.LocalDateTime.now
 
@@ -62,7 +62,7 @@ fun getNetworkStats(context: Context, startDate: LocalDateTime = now().atMidnigh
             }
             info?.let { i -> Triple(i, uidToMobileStats[it], uidToWifiStats[it]) }
         }
-        .filter { it.first.flags and ApplicationInfo.FLAG_SYSTEM == 0 } // Filter out system apps
+        .filter { !isSystemApp(packageManager, it.first.packageName) } // Filter out system apps
         .map {
             AppNetwork(
                 packageManager.getApplicationLabel(it.first).toString(),

@@ -1,10 +1,12 @@
 package com.example.android.stats.usage
 
+import android.annotation.SuppressLint
 import android.app.usage.UsageStats
 import android.app.usage.UsageStatsManager
 import android.content.Context
-import android.content.pm.ApplicationInfo
+import android.content.pm.PackageManager
 import android.content.pm.PackageManager.GET_SHARED_LIBRARY_FILES
+import android.content.pm.PackageManager.GET_SIGNATURES
 import android.graphics.drawable.Drawable
 import com.example.android.stats.atMidnight
 import com.example.android.stats.toDate
@@ -30,7 +32,18 @@ fun generateStats(context: Context, appUsageStats: Map<String, UsageStats>): Lis
             }
             info?.let { i -> i to it.value }
         }
-        .filter { it.first.flags and ApplicationInfo.FLAG_SYSTEM == 0 } // Filter out system apps
+        .filter { !isSystemApp(packageManager, it.first.packageName) }
         .map { AppUsage(packageManager.getApplicationLabel(it.first).toString(), packageManager.getApplicationIcon(it.first), it.second.totalTimeInForeground) }
         .toList()
+}
+
+@SuppressLint("PackageManagerGetSignatures")
+fun isSystemApp(packageManager: PackageManager, packageName: String): Boolean {
+    return try {
+        val sysPackage = packageManager.getPackageInfo("android", GET_SIGNATURES)
+        val appPackage = packageManager.getPackageInfo(packageName, GET_SIGNATURES)
+        appPackage?.signatures != null && sysPackage.signatures[0] == appPackage.signatures[0]
+    } catch (ex: PackageManager.NameNotFoundException) {
+        false
+    }
 }
