@@ -15,6 +15,7 @@ import androidx.core.os.bundleOf
 import androidx.core.view.GravityCompat
 import androidx.fragment.app.FragmentTransaction
 import com.example.android.stats.calls.CallsStats
+import com.example.android.stats.messages.MessageStats
 import com.example.android.stats.network.AppNetworkStats
 import com.example.android.stats.usage.AppUsageStats
 import com.google.android.material.datepicker.MaterialDatePicker
@@ -129,6 +130,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             R.id.nav_calls -> CallsStats(this)
             R.id.nav_app_usage -> AppUsageStats(this)
             R.id.nav_app_network -> AppNetworkStats(this)
+            R.id.nav_app_messages -> MessageStats(this)
             else -> throw IllegalStateException("Case not handled!")
         }
 
@@ -141,7 +143,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     private fun showFragment(fragment: StatsFragment<*>) {
         this.fragment = fragment
-
         val spinner: Spinner = findViewById(R.id.spinner)
         val selectedTimeRange = getSelectedTimeRange(spinner.selectedItem as String?)
         val arguments = bundleOf(Pair(SELECTED_RANGE, selectedTimeRange))

@@ -79,3 +79,21 @@ fun getLastWeekTimeRange(): Pair<LocalDateTime, LocalDateTime> = LocalDateTime.n
         getLastDayOfWeek(it)
     )
 }
+
+fun timeRangeToContentProviderSelect(dateField: String, start: LocalDateTime?, end: LocalDateTime?): Pair<String?, List<String>> {
+    val selectBuilder = StringBuilder()
+    val args = mutableListOf<String>()
+    if (start != null) {
+        selectBuilder.append("$dateField >?")
+        args.add(start.toDate().time.toString())
+        if (end != null) {
+            selectBuilder.append(" AND ")
+        }
+    }
+    if (end != null) {
+        selectBuilder.append("$dateField <?")
+        args.add(end.toDate().time.toString())
+    }
+    val select = if (selectBuilder.isEmpty()) null else selectBuilder.toString()
+    return Pair(select, args)
+}

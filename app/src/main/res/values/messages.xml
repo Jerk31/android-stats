@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="messages_page_title">Messages</string>
+    <string name="messages_total">Total SMS + MMS</string>
+    <string name="messages_stats_title">Received messages</string>
+    <string name="sms_received">SMS received</string>
+    <string name="sms_sent">SMS sent</string>
+    <string name="mms_received">MMS received</string>
+    <string name="mms_sent">MMS sent</string>
+</resources>

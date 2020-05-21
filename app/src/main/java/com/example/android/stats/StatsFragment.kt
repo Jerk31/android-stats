@@ -23,6 +23,7 @@ import kotlinx.android.synthetic.main.progress_overlay.*
 import kotlinx.android.synthetic.main.stats.*
 import kotlinx.android.synthetic.main.stats_total.*
 import kotlinx.coroutines.*
+import java.lang.Integer.min
 import java.time.LocalDateTime
 
 class StatsFragment<T>(private var statsProvider: StatsProvider<T>) : Fragment(), CoroutineScope by MainScope() {
@@ -127,7 +128,6 @@ class StatsFragment<T>(private var statsProvider: StatsProvider<T>) : Fragment()
 
         val yAxis = chart.axisLeft
         yAxis.setDrawAxisLine(true)
-        yAxis.setLabelCount(5, true)
         yAxis.textColor = activity!!.getColor(R.color.design_default_color_on_primary)
         yAxis.valueFormatter = object : ValueFormatter() {
             override fun getFormattedValue(value: Float): String {
@@ -181,6 +181,7 @@ class StatsFragment<T>(private var statsProvider: StatsProvider<T>) : Fragment()
         barData.barWidth = 0.9f
 
         chart.data = barData
+        chart.axisLeft.setLabelCount(min(5, entries.size), true)
         chart.invalidate()
     }
 

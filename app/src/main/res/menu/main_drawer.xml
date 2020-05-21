@@ -7,6 +7,10 @@
             android:checked="true"
             android:title="@string/calls_page_title" />
         <item
+            android:id="@+id/nav_app_messages"
+            android:icon="@drawable/ic_message_black_24dp"
+            android:title="@string/messages_page_title" />
+        <item
             android:id="@+id/nav_app_usage"
             android:icon="@drawable/ic_access_time_black_30dp"
             android:title="@string/usage_page_title" />

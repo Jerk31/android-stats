@@ -3,7 +3,7 @@ package com.example.android.stats.calls
 import android.annotation.SuppressLint
 import android.content.Context
 import android.provider.CallLog.Calls
-import com.example.android.stats.toDate
+import com.example.android.stats.timeRangeToContentProviderSelect
 import java.time.LocalDateTime
 
 data class CallLogInfo(val name: String?, val number: String, val callType: Int, val date: Long, val duration: Long)
@@ -21,25 +21,10 @@ fun getCallLogs(context: Context, startDate: LocalDateTime? = null, endDate: Loc
     val projection = arrayOf(Calls.NUMBER, Calls.DATE, Calls.DURATION, Calls.TYPE, Calls.CACHED_NAME)
 
     val callLogs = mutableListOf<CallLogInfo>()
-
-    // build select
-    val selectBuilder = StringBuilder()
-    val args = mutableListOf<String>()
-    if (startDate != null) {
-        selectBuilder.append(Calls.DATE + " >?")
-        args.add(startDate.toDate().time.toString())
-        if (endDate != null) {
-            selectBuilder.append(" AND ")
-        }
-    }
-    if (endDate != null) {
-        selectBuilder.append(Calls.DATE + " <?")
-        args.add(endDate.toDate().time.toString())
-    }
-    val select = if (selectBuilder.isEmpty()) null else selectBuilder.toString()
+    val select = timeRangeToContentProviderSelect(Calls.DATE, startDate, endDate)
 
     // run query & get results
-    contentResolver.query(Calls.CONTENT_URI, projection, select, args.toTypedArray(), Calls.DEFAULT_SORT_ORDER)?.use {
+    contentResolver.query(Calls.CONTENT_URI, projection, select.first, select.second.toTypedArray(), Calls.DEFAULT_SORT_ORDER)?.use {
         val nameColumn = it.getColumnIndex(Calls.CACHED_NAME)
         val numberColumn = it.getColumnIndex(Calls.NUMBER)
         val typeColumn = it.getColumnIndex(Calls.TYPE)
